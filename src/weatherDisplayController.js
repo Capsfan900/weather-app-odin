@@ -2,20 +2,20 @@ import { locationKey,gifKey,forecastKey } from "./apiVault";
 
 export const getWeatherDataFromLocation = async() =>{
     //---current day data---//
-    const img = document.querySelector('img');
     const LocationInputDiv = document.querySelector("#location-query");
-    const location = LocationInputDiv.value
-    const response = await fetch(locationKey);
+    const location = LocationInputDiv.value 
+    alert(location)
+    const img = document.querySelector('img');
+    const response = await fetch(locationKey+location,{mode: 'cors'});
     const queryResult = await response.json();
-
+ 
     //main stats + gif query
-    const gifResponse = await fetch(gifKey, {mode: 'cors'});
+
+    const gifResponse = await fetch(gifKey+queryResult.current.condition.text, {mode: 'cors'});
     const gifQueryResult = await gifResponse.json();
     img.src = gifQueryResult.data.images.original.url;
- 
 
-    console.log("----start of current day info----")    
-
+   
     const locationInfo = {
         country: queryResult.location.country,
         name: queryResult.location.name,
@@ -31,11 +31,6 @@ export const getWeatherDataFromLocation = async() =>{
         humidity: queryResult.current.humidity
     };
     
-    console.log("Location Information:", locationInfo);
-    console.log("Weather Details:", weatherDetails);
-    //---current day data and giff info---//
-
-
     //---3 day forecast data---//
     const forecastResponse = await fetch(forecastKey);
     const forecastResult = await forecastResponse.json();
@@ -55,15 +50,17 @@ export const getWeatherDataFromLocation = async() =>{
     } else {
         alert("bad weather data!")
     }
-    console.log("--start of forecast data--");
-    console.log(forecastData);
-    //---3 day forecast data---//
 
+  
     LocationInputDiv.value = " ";
+    let weatherData = [locationInfo,weatherDetails,forecastData]
+    console.log(weatherData) //make return 
+
 }
 
 
-//condition object text => query gif for picture => display picture
+
+
 
 
 
