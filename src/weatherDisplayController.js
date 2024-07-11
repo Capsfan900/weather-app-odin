@@ -54,7 +54,7 @@ export const getWeatherDataFromLocation = async() =>{
   
     LocationInputDiv.value = " ";
     let weatherData = [locationInfo,weatherDetails,forecastData]
-    console.log(weatherData) //make return 
+    console.log(weatherData)
 
 }
 
