@@ -5,19 +5,20 @@ import { locationKey,gifKey,forecastKey } from "./apiVault";
 //could refactor to handle all promises at once eventually 
 export const getWeatherDataFromLocation = async() =>{
     //---current day data---//
+    const imgBox = document.querySelector("#imgBox");
     const LocationInputDiv = document.querySelector("#location-query");
     const location = LocationInputDiv.value 
     alert(location)
-    const img = document.querySelector('img');
+    const img = document.createElement("img")
     const response = await fetch(locationKey+location,{mode: 'cors'});
     const queryResult = await response.json();
- 
     //main stats + gif query
 
     const gifResponse = await fetch(gifKey+queryResult.current.condition.text, {mode: 'cors'});
     const gifQueryResult = await gifResponse.json();
     img.src = gifQueryResult.data.images.original.url;
-
+    imgBox.appendChild(img)
+    
    
     const locationInfo = {
         country: queryResult.location.country,
@@ -59,83 +60,118 @@ export const getWeatherDataFromLocation = async() =>{
 }
 
 
+
+
+
+
+
+
+
+
+
+
 //pass in weather data
 export const createSiteComponents =  async(data) =>{
-    const weatherData =  await getWeatherDataFromLocation();
-    const locationDiv = document.createElement("div");
-    locationDiv.style.height = "200px"
-    locationDiv.style.width = "200px"
+    const weatherData = await getWeatherDataFromLocation();
+    
+    const infoContainer = document.querySelector(".infoContainer")
+    // Location details
+    let div1 = document.querySelector("#location");
+    div1.style.border ="1px solid black"
+    if (!div1) {
+        div1 = document.createElement("div");
+        div1.id = "location";
+    }
 
-    //location
-    for (const [key,value] of Object.entries(weatherData.locationInfo)){
-        let div1 = document.querySelector("#location")
-        //error handling
-        if (!div1) {
-            console.error("Container element not found");
-            return;
-        }
-        const locationDetail = document.createElement("div")
+    for (const [key, value] of Object.entries(weatherData.locationInfo)) {
+        const locationDetail = document.createElement("div");
         locationDetail.classList.add("location-details");
         locationDetail.textContent = `${key}: ${value}`;
         locationDetail.style.fontSize = "10px";
         locationDetail.style.height = "fit-content";
         locationDetail.style.width = "fit-content";
-        locationDetail.style.color  = 'Black'
+        locationDetail.style.color = 'Black';
         div1.appendChild(locationDetail);
     }
-    
-    //weather
-    for (const [key,value] of Object.entries(weatherData.weatherDetails)){
-        let div2 = document.querySelector("#weather")
-        //error handling
-        if (!div2) {
-            console.error("Container element not found");
-            return;
-        }
-        const weatherDetails = document.createElement("div")
+    infoContainer.appendChild(div1);
+
+    // Weather details
+    let div2 = document.querySelector("#weather");
+    div2.style.border ="1px solid black"
+    if (!div2) {
+        div2 = document.createElement("div");
+        div2.id = "weather";
+    }
+
+    for (const [key, value] of Object.entries(weatherData.weatherDetails)) {
+        const weatherDetails = document.createElement("div");
         weatherDetails.classList.add("weather-details");
         weatherDetails.textContent = `${key}: ${value}`;
         weatherDetails.style.fontSize = "10px";
         weatherDetails.style.height = "fit-content";
         weatherDetails.style.width = "fit-content";
-        weatherDetails.style.color  = 'Black'
+        weatherDetails.style.color = 'Black';
         div2.appendChild(weatherDetails);
     }
+    infoContainer.appendChild(div2);
 
-
+    // Append infoContainer to the document body or another parent element
     
+  
+
     //forecast 
-    const formatThreeDayForecast = () => {
-    
+        const forecastTitle = document.createElement("h2");
+        forecastTitle.id = "forecastTitle"
+        forecastTitle.textContent =`3 Day Forecast for  ${weatherData.locationInfo.region}`
         let div3 = document.querySelector(".forecast")
+        div3.appendChild(forecastTitle)
         //error handling
         if (!div3) {
             console.error("Container element not found");
             return;
         }
         let days = weatherData.forecastData
-        for(const day of days){
-            for (const [key,value] of Object.entries(day)){
-                const day1 = document.createElement("div");
-                day1.textContent = `${key}: ${value}`;
-                day1.classList.add("forecast-data");
-                day1.style.fontSize = "10px";
-                day1.style.height = "fit-content";
-                day1.style.width = "fit-content";
-                day1.style.color  = 'Black' 
-                day1.style.marginBottom = ".1rem"
-                div3.appendChild(day1);
-            }
-        }
+        for (const day of days) {
+            const dayWrapper = document.createElement("div");
+            dayWrapper.style.display = "flex";
+            dayWrapper.style.flexDirection = "column";
+            dayWrapper.style.height = "10rem";
+            dayWrapper.style.width = "10re";
+            dayWrapper.style.margin = "0.5rem";
+            dayWrapper.style.padding = "0.5rem";
+            dayWrapper.style.border = "1px solid #ccc";
         
+            for (const [key, value] of Object.entries(day)) {
+                const dayData = document.createElement("div");
+                dayData.id = "dayData"
+                dayData.textContent = `${key}: ${value}`;
+                dayData.classList.add("forecast-data");
+                dayData.style.fontSize = "10px";
+                dayData.style.height = "fit-content";
+                dayData.style.width = "fit-content";
+                dayData.style.color = 'Black';
+                dayData.style.marginBottom = ".1rem";
+        
+                dayWrapper.appendChild(dayData);
+            }
+        
+            div3.appendChild(dayWrapper);
+        }
+
+}
+
+
+export const clearPageUtil = () =>{
+    const container = document.documentElement
+    if (container) {
+        container.replaceChildren();
     }
-    formatThreeDayForecast()
-
-}   
+}
 
 
+export const loadingBarController = (promiseReturnStatus) =>{
 
-
+}
 
 
 
