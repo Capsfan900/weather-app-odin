@@ -20,6 +20,7 @@ export const getWeatherDataFromLocation = async() =>{
     imgBox.appendChild(img)
     
    
+    
     const locationInfo = {
         country: queryResult.location.country,
         name: queryResult.location.name,
@@ -97,7 +98,7 @@ export const createSiteComponents =  async(data) =>{
 
     // Weather details
     let div2 = document.querySelector("#weather");
-    div2.style.border ="1px solid black"
+    div2.style.border ="1px solid black";
     if (!div2) {
         div2 = document.createElement("div");
         div2.id = "weather";
@@ -122,9 +123,11 @@ export const createSiteComponents =  async(data) =>{
     //forecast 
         const forecastTitle = document.createElement("h2");
         forecastTitle.id = "forecastTitle"
-        forecastTitle.textContent =`3 Day Forecast for  ${weatherData.locationInfo.region}`
+        forecastTitle.textContent =`3 Day Forecast for  ${weatherData.locationInfo.name}, ${weatherData.locationInfo.region}`
         let div3 = document.querySelector(".forecast")
         div3.appendChild(forecastTitle)
+        const dayHolder = document.createElement("div")
+        dayHolder.id = "dayHolder"
         //error handling
         if (!div3) {
             console.error("Container element not found");
@@ -133,17 +136,15 @@ export const createSiteComponents =  async(data) =>{
         let days = weatherData.forecastData
         for (const day of days) {
             const dayWrapper = document.createElement("div");
+            dayWrapper.id = "dayBox"
             dayWrapper.style.display = "flex";
             dayWrapper.style.flexDirection = "column";
-            dayWrapper.style.height = "10rem";
-            dayWrapper.style.width = "10re";
             dayWrapper.style.margin = "0.5rem";
             dayWrapper.style.padding = "0.5rem";
             dayWrapper.style.border = "1px solid #ccc";
         
             for (const [key, value] of Object.entries(day)) {
                 const dayData = document.createElement("div");
-                dayData.id = "dayData"
                 dayData.textContent = `${key}: ${value}`;
                 dayData.classList.add("forecast-data");
                 dayData.style.fontSize = "10px";
@@ -154,17 +155,17 @@ export const createSiteComponents =  async(data) =>{
         
                 dayWrapper.appendChild(dayData);
             }
-        
-            div3.appendChild(dayWrapper);
+
+            dayHolder.appendChild(dayWrapper)
+            div3.appendChild(dayHolder);
         }
 
 }
 
 
-export const clearPageUtil = () =>{
-    const container = document.documentElement
-    if (container) {
-        container.replaceChildren();
+export const clearComponentContentsUtil = (component) =>{
+    if(component.hasChildNodes()){
+        component.replaceChildren();
     }
 }
 

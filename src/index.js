@@ -1,15 +1,18 @@
 import './css/style.css'
-import {clearPageUtil, createSiteComponents} from './weatherDisplayController'
+import {clearComponentContentsUtil, createSiteComponents} from './weatherDisplayController'
 
 
+const container = document.querySelector("#componentContainer")
 const queryBtn = document.querySelector("#locBtn")
+
+
 queryBtn.addEventListener("click",function(){
+
    createSiteComponents();
 });
 
 //create weather componets
 
-window.addEventListener('beforeunload', function (event) {
-   clearPageUtil()
+window.addEventListener('DOMContentLoaded', function (event) {
 });
 

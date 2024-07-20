@@ -19,6 +19,29 @@ body {
     flex-direction: column;
 }
 
+#componentContainer {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-y: visible;
+    overflow-x: hidden;
+    width: fit-content;
+    height: 100%;
+    gap: 1rem;
+
+}
+
+#componentContainer>div {
+    box-sizing: border-box;
+    background-color: gray;
+    border: 2px solid orange;
+    width: 600px;
+}
+
+
+
 .infoContainer {
     display: flex;
     flex-direction: column;
@@ -27,6 +50,13 @@ body {
     padding: 1px;
     gap: 10px;
     align-items: center;
+    padding: 20px;
+}
+
+#imgBox {
+    display: flex;
+    justify-content: center;
+
 }
 
 
@@ -40,23 +70,39 @@ body {
     text-align: center;
 }
 
+#dayHolder {
+    height: auto;
+    width: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#dayBox {
+    height: 200px;
+    width: 200px;
+}
+
 .forecast {
     display: grid;
     justify-content: center;
     align-items: center;
-    grid-column-start: 100px;
-    grid-template-columns: 10fr;
-    grid-template-rows: 1fr 5fr;
-    grid-row: 3/3;
+    text-align: centerad;
+    grid-template-columns: 1fr;
+    /* Adjusted grid template columns */
+    grid-template-rows: 1fr 2fr;
+    /* Adjusted grid template rows */
+    text-align: center;
 }
 
 #foreacastTitle {
-    grid-row: 2;
+    grid-row: 1;
 }
 
 #dayData {
-    grid-row: 1;
+    grid-row: 2;
 }
+
 
 .weatherQueryMenu {
     position: absolute;
