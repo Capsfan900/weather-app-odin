@@ -1,49 +1,60 @@
 
 import { locationKey,gifKey,forecastKey } from "./apiVault";
+const componentContainer = document.querySelector("#componentContainer");
 
+//could refactor to be more modular and less hard coded but its just course work
+//seperate the css styling from the JS for a more modular and maintainable approach
+// maybe refactor for practice but lesson was learned 
 
-//could refactor to handle all promises at once eventually 
-export const getWeatherDataFromLocation = async() =>{
-    //---current day data---//
-    const imgBox = document.querySelector("#imgBox");
+export const getWeatherData = async() =>{
     const LocationInputDiv = document.querySelector("#location-query");
     const location = LocationInputDiv.value 
     alert(location)
-    const img = document.createElement("img")
+    LocationInputDiv.textContent = " ";
+    alert("started API request")
+
     const response = await fetch(locationKey+location,{mode: 'cors'});
     const queryResult = await response.json();
-    //main stats + gif query
 
+    //gif query 
+    
     const gifResponse = await fetch(gifKey+queryResult.current.condition.text, {mode: 'cors'});
     const gifQueryResult = await gifResponse.json();
-    img.src = gifQueryResult.data.images.original.url;
-    imgBox.appendChild(img)
-    
-   
-    
+
+    const forecastResponse = await fetch(forecastKey);
+    const forecastResult = await forecastResponse.json();
+    return {queryResult,gifQueryResult,forecastResult}
+    //func returns JSON objects
+}
+
+
+///////////////////////////////////////////////////////////////
+
+export const formatCollectedData = async(data)=>{
+    data =  await getWeatherData()
+    const gifQueryResult = data.gifQueryResult
+    console.log(data)
     const locationInfo = {
-        country: queryResult.location.country,
-        name: queryResult.location.name,
-        region: queryResult.location.region,
-        localTime: queryResult.location.localtime
+        country: data.queryResult.location.country,
+        name: data.queryResult.location.name,
+        region: data.queryResult.location.region,
+        localTime: data.queryResult.location.localtime
     };
     
     const weatherDetails = {
-        briefDescription: queryResult.current.condition.text,
-        heatIndexF: queryResult.current.heatindex_f,
-        windSpeedMph: queryResult.current.wind_mph,
-        windDirection: queryResult.current.wind_dir,
-        humidity: queryResult.current.humidity
+        briefDescription: data.queryResult.current.condition.text,
+        heatIndexF: data.queryResult.current.heatindex_f,
+        windSpeedMph: data.queryResult.current.wind_mph,
+        windDirection: data.queryResult.current.wind_dir,
+        humidity: data.queryResult.current.humidity
     };
-    
+
     //---3 day forecast data---//
-    const forecastResponse = await fetch(forecastKey);
-    const forecastResult = await forecastResponse.json();
     let forecastData = [];
     //if statement is checking if said data exists (defined data vs undefined data)
-    if (forecastResult.forecast && forecastResult.forecast.forecastday) {
+    if (data.forecastResult.forecast && data.forecastResult.forecast.forecastday) {
         //map(make a new array based off the forecast data and forecast day)
-        forecastData = forecastResult.forecast.forecastday.map((day, index) => {
+        forecastData = data.forecastResult.forecast.forecastday.map((day, index) => {
             return {
                 day: index + 1,
                 date: day.date,
@@ -52,127 +63,147 @@ export const getWeatherDataFromLocation = async() =>{
                 condition: day.day.condition.text
             };
         });
-    } else {
+    } else { 
         alert("bad weather data!")
     }
+    alert("end (promised data is fuffilled)")
 
-    LocationInputDiv.value = " ";
-    return  {locationInfo,weatherDetails,forecastData}
+    return {locationInfo, weatherDetails, forecastData ,gifQueryResult}
 }
 
 
 
+//////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
-
-
-
-//pass in weather data
-export const createSiteComponents =  async(data) =>{
-    const weatherData = await getWeatherDataFromLocation();
-    
-    const infoContainer = document.querySelector(".infoContainer")
-    // Location details
-    let div1 = document.querySelector("#location");
-    div1.style.border ="1px solid black"
-    if (!div1) {
-        div1 = document.createElement("div");
-        div1.id = "location";
+class DomManipulator {
+    constructor(componentContainer) {
+        this.componentContainer = componentContainer;
     }
 
-    for (const [key, value] of Object.entries(weatherData.locationInfo)) {
-        const locationDetail = document.createElement("div");
-        locationDetail.classList.add("location-details");
-        locationDetail.textContent = `${key}: ${value}`;
-        locationDetail.style.fontSize = "10px";
-        locationDetail.style.height = "fit-content";
-        locationDetail.style.width = "fit-content";
-        locationDetail.style.color = 'Black';
-        div1.appendChild(locationDetail);
-    }
-    infoContainer.appendChild(div1);
-
-    // Weather details
-    let div2 = document.querySelector("#weather");
-    div2.style.border ="1px solid black";
-    if (!div2) {
-        div2 = document.createElement("div");
-        div2.id = "weather";
+    //parameters must be image url or gif
+    createImageBox(gifQueryResult) {
+        const imgBox = document.createElement("div");
+        imgBox.id = "imgBox";
+        const img = document.createElement("img");
+        img.src = gifQueryResult.data.images.original.url;
+        imgBox.appendChild(img);
+        this.componentContainer.appendChild(imgBox);
     }
 
-    for (const [key, value] of Object.entries(weatherData.weatherDetails)) {
-        const weatherDetails = document.createElement("div");
-        weatherDetails.classList.add("weather-details");
-        weatherDetails.textContent = `${key}: ${value}`;
-        weatherDetails.style.fontSize = "10px";
-        weatherDetails.style.height = "fit-content";
-        weatherDetails.style.width = "fit-content";
-        weatherDetails.style.color = 'Black';
-        div2.appendChild(weatherDetails);
+    //parameters must be objects of data
+    createInfoContainer(weatherData) {
+        const infoContainer = document.createElement("div");
+        infoContainer.id = "infoContainer";
+        this.componentContainer.appendChild(infoContainer);
+
+        this.createInfoSection(infoContainer, "Location Information", weatherData.locationInfo, "location");
+        this.createInfoSection(infoContainer, "Weather Information", weatherData.weatherDetails, "weather");
     }
-    infoContainer.appendChild(div2);
 
-    // Append infoContainer to the document body or another parent element
-    
-  
 
-    //forecast 
+    createInfoSection(container, title, data, id) {
+        const titleElement = document.createElement("h4");
+        titleElement.textContent = title;
+        container.appendChild(titleElement);
+
+        const div = document.createElement("div");
+        div.id = id;
+        div.style.border = "1px solid black";
+
+        for (const [key, value] of Object.entries(data)) {
+            const detailPair = this.createDetailPair(key, value);
+            div.appendChild(detailPair);
+        }
+
+        container.appendChild(div);
+    }
+
+    createDetailPair(key, value) {
+        const detailPair = document.createElement("div");
+        detailPair.classList.add("detail-pair");
+
+        const keyDiv = document.createElement("div");
+        keyDiv.classList.add("detail-key");
+        keyDiv.textContent = key;
+
+        const separator = document.createElement("div");
+        separator.classList.add("detail-separator");
+        separator.textContent = "|-----|";
+
+        const valueDiv = document.createElement("div");
+        valueDiv.classList.add("detail-value");
+        valueDiv.textContent = value;
+
+        detailPair.append(keyDiv, separator, valueDiv);
+        detailPair.style.fontSize = "10px";
+        detailPair.style.color = 'Black';
+
+        return detailPair;
+    }
+
+    createForecastSection(weatherData) {
+        const forecast = document.createElement("div");
+        forecast.classList.add("forecast");
+
         const forecastTitle = document.createElement("h2");
-        forecastTitle.id = "forecastTitle"
-        forecastTitle.textContent =`3 Day Forecast for  ${weatherData.locationInfo.name}, ${weatherData.locationInfo.region}`
-        let div3 = document.querySelector(".forecast")
-        div3.appendChild(forecastTitle)
-        const dayHolder = document.createElement("div")
-        dayHolder.id = "dayHolder"
-        //error handling
-        if (!div3) {
-            console.error("Container element not found");
-            return;
+        forecastTitle.id = "forecastTitle";
+        forecastTitle.textContent = `3 Day Forecast for ${weatherData.locationInfo.name}, ${weatherData.locationInfo.region}`;
+        forecast.appendChild(forecastTitle);
+
+        const dayHolder = document.createElement("div");
+        dayHolder.id = "dayHolder";
+
+        weatherData.forecastData.forEach(day => {
+            const dayWrapper = this.createDayWrapper(day);
+            dayHolder.appendChild(dayWrapper);
+        });
+
+        forecast.appendChild(dayHolder);
+        this.componentContainer.appendChild(forecast);
+    }
+
+    createDayWrapper(day) {
+        const dayWrapper = document.createElement("div");
+        dayWrapper.id = "dayBox";
+        dayWrapper.style.display = "flex";
+        dayWrapper.style.flexDirection = "column";
+        dayWrapper.style.margin = "0.5rem";
+        dayWrapper.style.padding = "0.5rem";
+        dayWrapper.style.border = "1px solid #ccc";
+
+        for (const [key, value] of Object.entries(day)) {
+            const dayData = document.createElement("div");
+            dayData.textContent = `${key}: ${value}`;
+            dayData.classList.add("forecast-data");
+            dayData.style.fontSize = "10px";
+            dayData.style.height = "fit-content";
+            dayData.style.width = "fit-content";
+            dayData.style.color = 'Black';
+            dayData.style.marginBottom = ".1rem";
+
+            dayWrapper.appendChild(dayData);
         }
-        let days = weatherData.forecastData
-        for (const day of days) {
-            const dayWrapper = document.createElement("div");
-            dayWrapper.id = "dayBox"
-            dayWrapper.style.display = "flex";
-            dayWrapper.style.flexDirection = "column";
-            dayWrapper.style.margin = "0.5rem";
-            dayWrapper.style.padding = "0.5rem";
-            dayWrapper.style.border = "1px solid #ccc";
-        
-            for (const [key, value] of Object.entries(day)) {
-                const dayData = document.createElement("div");
-                dayData.textContent = `${key}: ${value}`;
-                dayData.classList.add("forecast-data");
-                dayData.style.fontSize = "10px";
-                dayData.style.height = "fit-content";
-                dayData.style.width = "fit-content";
-                dayData.style.color = 'Black';
-                dayData.style.marginBottom = ".1rem";
-        
-                dayWrapper.appendChild(dayData);
-            }
 
-            dayHolder.appendChild(dayWrapper)
-            div3.appendChild(dayHolder);
-        }
-
-}
-
-
-export const clearComponentContentsUtil = (component) =>{
-    if(component.hasChildNodes()){
-        component.replaceChildren();
+        return dayWrapper;
     }
 }
 
+export const createSiteComponents = async () => {
+    const weatherData = await formatCollectedData();
+    const domManipulator = new DomManipulator(componentContainer);
+    domManipulator.createImageBox(weatherData.gifQueryResult);
+    domManipulator.createInfoContainer(weatherData);
+    domManipulator.createForecastSection(weatherData);
+};
 
-export const loadingBarController = (promiseReturnStatus) =>{
 
+
+
+export const clearComponentContentsUtil = (component) => {
+    component.innerHTML = " "
 }
+
+
 
 
 

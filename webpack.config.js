@@ -22,8 +22,10 @@ module.exports = {
                     }
                 }
             },
+            
         ]
     },
+
     output: {
         path: path.resolve(__dirname, "dist"),
         filename: 'bundle.js',
@@ -32,8 +34,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             template: './src/index.html',
-        }),
-
+        })
     ],
     mode: "development"
 };
